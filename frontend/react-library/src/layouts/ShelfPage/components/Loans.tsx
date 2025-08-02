@@ -1,12 +1,12 @@
-import { useOktaAuth } from "@okta/okta-react";
 import { Fragment, useEffect, useState } from "react";
 import ShelfCurrentLoans from "../../../models/ShelfCurrentLoans";
 import Spinner from "../../utils/Spinner";
 import { Link } from "react-router-dom";
 import LoansModal from "./LoandsModal";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Loans() {
-  const { authState } = useOktaAuth();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [httpError, setHttpError] = useState(null);
 
   const [shelfCurrentLoans, setShelfCurrentLoans] = useState<ShelfCurrentLoans[]>([]);
@@ -15,12 +15,13 @@ export default function Loans() {
 
   useEffect(() => {
     const fetchUserCurrentLoans = async () => {
-      if (authState && authState.isAuthenticated) {
+      if (isAuthenticated) {
         const url = `${process.env.REACT_APP_API}/books/secure/currentloans`;
+        const accessToken = await getAccessTokenSilently();
         const requestOptions = {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${authState.accessToken?.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         };
@@ -39,7 +40,7 @@ export default function Loans() {
       setHttpError(error.message);
     });
     window.scrollTo(0, 0);
-  }, [authState, checkout]);
+  }, [isAuthenticated, getAccessTokenSilently, checkout]);
 
   if (isLoadingUserLoans) {
     return <Spinner />;
@@ -55,10 +56,11 @@ export default function Loans() {
 
   async function returnBook(bookId: number) {
     const url = `${process.env.REACT_APP_API}/books/secure/return/?bookId=${bookId}`;
+    const accessToken = await getAccessTokenSilently();
     const requestOptions = {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     };
@@ -71,10 +73,11 @@ export default function Loans() {
 
   async function renewLoan(bookId: number) {
     const url = `${process.env.REACT_APP_API}/books/secure/renew/loan/?bookId=${bookId}`;
+    const accessToken = await getAccessTokenSilently();
     const requestOptions = {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     };

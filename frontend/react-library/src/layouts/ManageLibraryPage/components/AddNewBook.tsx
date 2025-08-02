@@ -1,10 +1,10 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { useOktaAuth } from "@okta/okta-react";
 import { useState } from "react";
 import AddBookRquest from "../../../models/AddBookRequest";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function AddNewBook() {
-  const { authState } = useOktaAuth();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -39,8 +39,9 @@ export default function AddNewBook() {
 
   async function submitNewBook() {
     const url = `${process.env.REACT_APP_API}/admin/secure/add/book`;
+    const accessToken = await getAccessTokenSilently();
     if (
-      authState?.isAuthenticated &&
+      isAuthenticated &&
       title !== "" &&
       author !== "" &&
       category !== "Category" &&
@@ -58,7 +59,7 @@ export default function AddNewBook() {
       const requestionOptions = {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': "application/json",
         },
         body: JSON.stringify(book),

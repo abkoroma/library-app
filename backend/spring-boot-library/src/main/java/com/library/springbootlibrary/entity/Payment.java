@@ -1,4 +1,4 @@
-package com.library.springbootlibrary.entity;
+/*package com.library.springbootlibrary.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,3 +19,4 @@ public class Payment {
     @Column(name = "amount")
     private Long amount;
 }
+*/

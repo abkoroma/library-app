@@ -4,9 +4,11 @@ import com.library.springbootlibrary.requestmodels.ReviewRequest;
 import com.library.springbootlibrary.service.ReviewService;
 import com.library.springbootlibrary.utils.ExtractJWT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin("https://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
@@ -18,9 +20,8 @@ public class ReviewController {
     }
 
     @GetMapping("/secure/user/book")
-    public Boolean reviewBookByUser(@RequestHeader(value = "Authorization") String token,
-                                    @RequestBody Long bookId) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public Boolean reviewBookByUser(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) throws Exception {
+        String userEmail = jwt.getClaim("email");
         if (userEmail == null) {
             throw new Exception("User email is missing");
         }
@@ -28,9 +29,9 @@ public class ReviewController {
     }
 
     @PostMapping("/secure")
-    public void postReview(@RequestHeader(value = "Authorization") String token,
+    public void postReview(@AuthenticationPrincipal Jwt jwt,
                            @RequestBody ReviewRequest reviewRequest) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+        String userEmail = jwt.getClaim("email");
         if (userEmail == null) {
             throw new Exception("User email is missing");
         }

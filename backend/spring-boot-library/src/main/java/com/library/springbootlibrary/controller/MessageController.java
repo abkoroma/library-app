@@ -5,9 +5,13 @@ import com.library.springbootlibrary.requestmodels.AdminQuestionRequest;
 import com.library.springbootlibrary.service.MessagesService;
 import com.library.springbootlibrary.utils.ExtractJWT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin("https://localhost:3000")
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/messages")
 public class MessageController {
@@ -20,17 +24,17 @@ public class MessageController {
     }
 
     @PostMapping("/secure/add/message")
-    public void postMessage(@RequestHeader(value = "Authorization") String token,
-                            @RequestBody Message messageRequest) {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public void postMessage(@AuthenticationPrincipal Jwt jwt, @RequestBody Message messageRequest) {
+        String userEmail = jwt.getClaim("email");
         messagesService.postMessage(messageRequest, userEmail);
     }
 
     @PutMapping("/secure/admin/message")
-    public void putMessage(@RequestHeader(value = "Authorization") String token,
+    public void putMessage(@AuthenticationPrincipal Jwt jwt,
                             @RequestBody AdminQuestionRequest adminQuestionRequest) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
-        String admin = ExtractJWT.payloadJWTExtraction(token, "\"userType\"");
+        String userEmail = jwt.getClaim("email");
+        List<String> roles = jwt.getClaimAsStringList("https//luv2code-react-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
 
         if (admin == null || !admin.equals("admin")) {
             throw new Exception("Administration page only");

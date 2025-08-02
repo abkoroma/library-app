@@ -1,4 +1,4 @@
-package com.library.springbootlibrary.service;
+/*package com.library.springbootlibrary.service;
 
 import com.library.springbootlibrary.dao.PaymentRepositoryDAO;
 import com.library.springbootlibrary.entity.Payment;
@@ -54,3 +54,4 @@ public class PaymentService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
+ */

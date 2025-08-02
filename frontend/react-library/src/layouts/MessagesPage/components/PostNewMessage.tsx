@@ -1,10 +1,10 @@
-import { useOktaAuth } from "@okta/okta-react";
 import { useState } from "react";
 import MessageModel from "../../../models/MessageModel";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function PostNewMessage() {
 
-    const { authState } = useOktaAuth();
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [title, setTitle] = useState('');
     const [question, setQuestion] = useState('');
     const [displayWarning, setDisplayWarning] = useState(false);
@@ -12,14 +12,15 @@ export default function PostNewMessage() {
 
     async function submitNewQuestion() {
         const url = `${process.env.REACT_APP_API}/messages/secure/add/message`;
-        if (authState?.isAuthenticated && title !== '' && question !== '') {
+        const accessToken = await getAccessTokenSilently();
+        if (isAuthenticated && title !== '' && question !== '') {
             const messageResponseRequestModel: MessageModel = new MessageModel(
                 title, question
             );
             const requestionOptions = {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
                 body:JSON.stringify(messageResponseRequestModel)

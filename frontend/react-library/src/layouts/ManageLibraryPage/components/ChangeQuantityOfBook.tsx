@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import BookModel from "../../../models/BookModel";
-import { useOktaAuth } from "@okta/okta-react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function ChangeQuantityOfBook(props: {book: BookModel, deleteBook: any}) {
 
-    const { authState } = useOktaAuth();
+    const { getAccessTokenSilently } = useAuth0();
 
     const [quantity, setQuantity] = useState<number>(0);
     const [remaining, setRemaining] = useState<number>(0);
@@ -20,10 +20,11 @@ export default function ChangeQuantityOfBook(props: {book: BookModel, deleteBook
 
     async function increaseQuantity() {
         const url = `${process.env.REACT_APP_API}/admin/secure/increase/book/quantity/?bookId=${props.book?.id}`;
+        const accessToken = await getAccessTokenSilently();
         const requestionOptions = {
             method: 'PUT',
             headers: {
-                Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             }
         };
@@ -38,10 +39,11 @@ export default function ChangeQuantityOfBook(props: {book: BookModel, deleteBook
 
     async function decreaseQuantity() {
         const url = `${process.env.REACT_APP_API}/admin/secure/decrease/book/quantity/?bookId=${props.book?.id}`;
+        const accessToken = await getAccessTokenSilently();
         const requestionOptions = {
             method: 'PUT',
             headers: {
-                Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             }
         };
@@ -56,10 +58,11 @@ export default function ChangeQuantityOfBook(props: {book: BookModel, deleteBook
 
     async function deleteBook() {
         const url = `${process.env.REACT_APP_API}/admin/secure/delete/book/?bookId=${props.book?.id}`;
+        const accessToken = await getAccessTokenSilently();
         const requestionOptions = {
             method: 'DELETE',
             headers: {
-                Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             }
         };

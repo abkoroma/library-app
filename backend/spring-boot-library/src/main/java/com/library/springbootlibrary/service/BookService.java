@@ -3,11 +3,11 @@ package com.library.springbootlibrary.service;
 import com.library.springbootlibrary.dao.BookRepositoryDAO;
 import com.library.springbootlibrary.dao.CheckoutRepositoryDAO;
 import com.library.springbootlibrary.dao.HistoryRepositoryDAO;
-import com.library.springbootlibrary.dao.PaymentRepositoryDAO;
+//import com.library.springbootlibrary.dao.PaymentRepositoryDAO;
 import com.library.springbootlibrary.entity.Book;
 import com.library.springbootlibrary.entity.Checkout;
 import com.library.springbootlibrary.entity.History;
-import com.library.springbootlibrary.entity.Payment;
+//import com.library.springbootlibrary.entity.Payment;
 import com.library.springbootlibrary.responsemodels.ShelfCurrentLoansResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,17 +28,17 @@ public class BookService {
     private BookRepositoryDAO bookRepositoryDAO;
     private CheckoutRepositoryDAO checkoutRepositoryDAO;
     private HistoryRepositoryDAO historyRepositoryDAO;
-    private PaymentRepositoryDAO paymentRepositoryDAO;
+    //private PaymentRepositoryDAO paymentRepositoryDAO;
 
     @Autowired
     public BookService(BookRepositoryDAO bookRepositoryDAO,
                        CheckoutRepositoryDAO checkoutRepositoryDAO,
-                       HistoryRepositoryDAO historyRepositoryDAO,
-                       PaymentRepositoryDAO paymentRepositoryDAO) {
+                       HistoryRepositoryDAO historyRepositoryDAO
+                       /*PaymentRepositoryDAO paymentRepositoryDAO*/) {
         this.bookRepositoryDAO = bookRepositoryDAO;
         this.checkoutRepositoryDAO = checkoutRepositoryDAO;
         this.historyRepositoryDAO = historyRepositoryDAO;
-        this.paymentRepositoryDAO = paymentRepositoryDAO;
+        //this.paymentRepositoryDAO = paymentRepositoryDAO;
     }
 
     public Book checkoutBook(String userEmail, Long bookId) throws Exception {
@@ -51,40 +51,6 @@ public class BookService {
         //check if the book is not null
         if (!book.isPresent() || validateCheckout != null || book.get().getCopiesAvailable() <= 0) {
             throw new Exception("Book doesn't exist or already checked out by user");
-        }
-
-        //validate books checked out
-        List<Checkout> currentBooksCheckedOut = checkoutRepositoryDAO.findBooksByUserEmail(userEmail);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        boolean bookNeedsReturned = false;
-
-        for (Checkout checkout : currentBooksCheckedOut) {
-            Date d1 = sdf.parse(checkout.getReturnDate());
-            Date d2 = sdf.parse(LocalDate.now().toString());
-
-            TimeUnit time = TimeUnit.DAYS;
-
-            double differenceInTime = time.convert(d1.getTime() - d2.getTime(), TimeUnit.MILLISECONDS);
-
-            if (differenceInTime < 0) {
-                bookNeedsReturned = true;
-                break;
-            }
-        }
-
-        Payment userPayment = paymentRepositoryDAO.findByUserEmail(userEmail);
-
-        if ((userPayment != null && userPayment.getAmount() > 0) ||
-                (userPayment != null && bookNeedsReturned)) {
-            throw new Exception("Outstanding fees");
-        }
-
-        if (userPayment != null) {
-            Payment payment = new Payment();
-            payment.setAmount((long) 00.00);
-            payment.setUserEmail(userEmail);
-            paymentRepositoryDAO.save(payment);
         }
 
         // set the copies available - 1 and save the new book
@@ -111,11 +77,7 @@ public class BookService {
         Checkout validateCheckout = checkoutRepositoryDAO.findByUserEmailAndBookId(userEmail, bookId);
 
         //check if the book is not null
-        if (validateCheckout != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return validateCheckout != null;
     }
 
     public int currentLoansCount(String userEmail) {
@@ -169,23 +131,6 @@ public class BookService {
         book.get().setCopiesAvailable(book.get().getCopiesAvailable() + 1);
 
         bookRepositoryDAO.save(book.get());
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        Date d1 = sdf.parse(validateCheckout.getReturnDate());
-        Date d2 = sdf.parse(LocalDate.now().toString());
-
-        TimeUnit time = TimeUnit.DAYS;
-
-        double differenceInTime = time.convert(d1.getTime() - d2.getTime(), TimeUnit.MILLISECONDS);
-
-        if (differenceInTime < 0) {
-            Payment payment = paymentRepositoryDAO.findByUserEmail(userEmail);
-
-            payment.setAmount((long) (payment.getAmount() + (differenceInTime * -1)));
-            paymentRepositoryDAO.save(payment);
-        }
-
         checkoutRepositoryDAO.deleteById(validateCheckout.getId());
 
         History history = new History(

@@ -4,9 +4,13 @@ import com.library.springbootlibrary.requestmodels.AddBookRequest;
 import com.library.springbootlibrary.service.AdminService;
 import com.library.springbootlibrary.utils.ExtractJWT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "https://localhost:3000")
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -19,9 +23,10 @@ public class AdminController {
     }
 
     @PutMapping("/secure/increase/book/quantity")
-    public void increaseBookQuantity(@RequestHeader(value = "Authorization") String token,
-                         @RequestParam Long bookId) throws Exception {
-        String admin = ExtractJWT.payloadJWTExtraction(token, "\"userType\"");
+    public void increaseBookQuantity(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) throws Exception {
+        List<String> roles = jwt.getClaimAsStringList("https://luv2code-react-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
         if (admin == null || !admin.equals("admin")) {
             throw new Exception("Administration page only");
         }
@@ -29,9 +34,10 @@ public class AdminController {
     }
 
     @PutMapping("/secure/decrease/book/quantity")
-    public void decreaseBookQuantity(@RequestHeader(value = "Authorization") String token,
-                                     @RequestParam Long bookId) throws Exception {
-        String admin = ExtractJWT.payloadJWTExtraction(token, "\"userType\"");
+    public void decreaseBookQuantity(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) throws Exception {
+        List<String> roles = jwt.getClaimAsStringList("https://luv2code-react-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
         if (admin == null || !admin.equals("admin")) {
             throw new Exception("Administration page only");
         }
@@ -40,9 +46,11 @@ public class AdminController {
 
 
     @PostMapping("/secure/add/book")
-    public void postBook(@RequestHeader(value = "Authorization") String token,
+    public void postBook(@AuthenticationPrincipal Jwt jwt,
                          @RequestBody AddBookRequest addBookRequest) throws Exception {
-        String admin = ExtractJWT.payloadJWTExtraction(token, "\"userType\"");
+        List<String> roles = jwt.getClaimAsStringList("https://luv2code-react-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
         if (admin == null || !admin.equals("admin")) {
             throw new Exception("Administration page only");
         }
@@ -50,9 +58,11 @@ public class AdminController {
     }
 
     @DeleteMapping("/secure/delete/book")
-    public void deleteBook(@RequestHeader(value = "Authorization") String token,
+    public void deleteBook(@AuthenticationPrincipal Jwt jwt,
                            @RequestParam Long bookId) throws Exception {
-        String admin = ExtractJWT.payloadJWTExtraction(token, "\"userType\"");
+        List<String> roles = jwt.getClaimAsStringList("https://luv2code-react-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
         if (admin == null || !admin.equals("admin")) {
             throw new Exception("Administration page only");
         }

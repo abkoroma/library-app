@@ -1,10 +1,10 @@
-import { useOktaAuth } from "@okta/okta-react"
+import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router-dom";
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 export default function LibraryServices() {
 
-    const { authState } = useOktaAuth();
+    const { isAuthenticated } = useAuth0();
 
     return (
         <div className="container my-5">
@@ -16,7 +16,7 @@ export default function LibraryServices() {
                         send our library admin's a personal message!
                     </p>
                     <div className="d-grid gap-2 justify-content-md-start mb-4 mb-lg-3">
-                        {authState?.isAuthenticated ?
+                        {isAuthenticated ?
                             <Link 
                                 to='/messages'
                                 type="button" 

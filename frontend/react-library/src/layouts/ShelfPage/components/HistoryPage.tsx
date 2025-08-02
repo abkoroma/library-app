@@ -1,13 +1,13 @@
-import { useOktaAuth } from "@okta/okta-react";
 import { Fragment, useEffect, useState } from "react";
 import HistoryModel from "../../../models/HistoryModel";
 import Spinner from "../../utils/Spinner";
 import { Link } from "react-router-dom";
 import Pagination from "../../utils/Pagination";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function HistoryPage() {
   
-  const { authState } = useOktaAuth();
+  const { isAuthenticated, user } = useAuth0();
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [httpError, setHttpError] = useState(null);
 
@@ -20,8 +20,8 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const fetchUserHistory = async () => {
-      if (authState && authState.isAuthenticated) {
-        const url = `${process.env.REACT_APP_API}/histories/search/findBooksByUserEmail/?userEmail=${authState.accessToken?.claims.sub}&page=${currentPage - 1}&size=5`;
+      if (isAuthenticated) {
+        const url = `${process.env.REACT_APP_API}/histories/search/findBooksByUserEmail/?userEmail=${user?.email}&page=${currentPage - 1}&size=5`;
         const requestOptions = {
           method: "GET",
           headers: {
@@ -43,7 +43,7 @@ export default function HistoryPage() {
       setIsLoadingHistory(false);
       setHttpError(error.message);
     });
-  }, [authState, currentPage]);
+  }, [isAuthenticated, currentPage, user]);
 
   if (isLoadingHistory) {
     return <Spinner />;

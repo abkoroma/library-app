@@ -5,11 +5,13 @@ import com.library.springbootlibrary.responsemodels.ShelfCurrentLoansResponse;
 import com.library.springbootlibrary.service.BookService;
 import com.library.springbootlibrary.utils.ExtractJWT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(value = "https://localhost:3000", methods = RequestMethod.GET)
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -22,43 +24,38 @@ public class BookController {
     }
 
     @GetMapping("/secure/currentloans")
-    public List<ShelfCurrentLoansResponse> currentLoans(@RequestHeader(value = "Authorization")
-                                                            String token) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public List<ShelfCurrentLoansResponse> currentLoans(@AuthenticationPrincipal Jwt jwt) throws Exception {
+        String userEmail = jwt.getClaim("email");
         return bookService.currentLoans(userEmail);
     }
 
     @GetMapping("/secure/currentloans/count")
-    public int currentLoansCount(@RequestHeader(value = "Authorization") String token) {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public int currentLoansCount(@AuthenticationPrincipal Jwt jwt) {
+        String userEmail = jwt.getClaim("email");
         return bookService.currentLoansCount(userEmail);
     }
 
     @GetMapping("/secure/ischeckedout/byuser")
-    public Boolean checkoutBookByUser(@RequestHeader(value = "Authorization") String token,
-                                      @RequestParam Long bookId) {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public Boolean checkoutBookByUser(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) {
+        String userEmail = jwt.getClaim("email");
         return bookService.checkoutBookByUser(userEmail, bookId);
     }
 
     @PutMapping("/secure/checkout")
-    public Book checkoutBook(@RequestHeader(value = "Authorization") String token,
-                             @RequestParam Long bookId) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public Book checkoutBook(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) throws Exception {
+        String userEmail = jwt.getClaim("email");
         return bookService.checkoutBook(userEmail, bookId);
     }
 
     @PutMapping("/secure/return")
-    public void returnBook(@RequestHeader(value = "Authorization") String token,
-                           @RequestParam Long bookId) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public void returnBook(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) throws Exception {
+        String userEmail = jwt.getClaim("email");
         bookService.returnBook(userEmail, bookId);
     }
 
     @PutMapping("/secure/renew/loan")
-    public void renewLoan(@RequestHeader(value = "Authorization") String token,
-                           @RequestParam Long bookId) throws Exception {
-        String userEmail = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+    public void renewLoan(@AuthenticationPrincipal Jwt jwt, @RequestParam Long bookId) throws Exception {
+        String userEmail = jwt.getClaim("email");
         bookService.renewLoan(userEmail, bookId);
     }
 

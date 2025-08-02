@@ -1,14 +1,14 @@
-import { useOktaAuth } from "@okta/okta-react";
 import { useEffect, useState } from "react";
 import MessageModel from "../../../models/MessageModel";
 import Spinner from "../../utils/Spinner";
 import Pagination from "../../utils/Pagination";
 import AdminMessage from "./AdminMessage";
 import AdminMessageRequest from "../../../models/AdminMessageRequest";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function AdminMessages() {
 
-    const { authState } = useOktaAuth();
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
     const [isLoadinngMessages, setIsLoadingMessages] = useState(true);
     const [httpError, setHttpError] = useState(null);
@@ -24,12 +24,13 @@ export default function AdminMessages() {
 
     useEffect(() => {
         const fetchUserMessages = async () => {
-            if (authState && authState.isAuthenticated) {
+            if (isAuthenticated) {
                 const url = `${process.env.REACT_APP_API}/messages/search/findByClosed/?closed=false&page=${currentPage - 1}&size=${messagesPerPage}`;
+                const accessToken = await getAccessTokenSilently();
                 const requestOptions = {
                     method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${authState.accessToken?.accessToken}`,
+                        Authorization: `Bearer ${accessToken}`,
                         'Content-Type': 'application/json',
                     }
                 };
@@ -49,7 +50,7 @@ export default function AdminMessages() {
             setHttpError(error.messages);
         })
         window.scrollTo(0, 0);
-    }, [authState, currentPage, messagesPerPage, btnSubmit]);
+    }, [currentPage, getAccessTokenSilently, isAuthenticated, messagesPerPage]);
 
     if (isLoadinngMessages) {
         return (
@@ -68,12 +69,13 @@ export default function AdminMessages() {
 
     async function submitResponseToQuestion(id: number, response: string) {
         const url = `${process.env.REACT_APP_API}/messages/secure/admin/message`;
-        if (authState && authState?.isAuthenticated && id !== null && response !== '') {
+        const accessToken = await getAccessTokenSilently();
+        if (isAuthenticated && id !== null && response !== '') {
             const messageAdminRequestModel: AdminMessageRequest = new AdminMessageRequest(id, response);
             const requestionOptions = {
                 method: 'PUT',
                 headers: {
-                    Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(messageAdminRequestModel)

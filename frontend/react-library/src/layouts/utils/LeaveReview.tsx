@@ -14,9 +14,9 @@ export default function LeaveReview(props: { submitReview: any }) {
 
     return (
         <div className="dropdown" style={{ cursor: 'pointer'}}>
-            <h5 className="dropdown-toggle" id="dropdownMenuButton1" data-bs-toggle="dropdown">
+            <h4 className="dropdown-toggle" id="dropdownMenuButton1" data-bs-toggle="dropdown">
                 Leave a review?
-            </h5>
+            </h4>
             <ul id="submitReviewRating" className="dropdownMenu" aria-labelledby="dropdownMenuButton1">
                 <li>
                     <button onClick={() => starValue(0)} className="dropdown-item">
@@ -84,7 +84,9 @@ export default function LeaveReview(props: { submitReview: any }) {
                             Description
                         </label>
                         <textarea className="form-control" id="submitReviewDescription" 
-                            placeholder="Optional" rows={3} onChange={e => setReviewDescription(e.target.value)}>
+                            placeholder="Optional" rows={3} 
+                            onChange={e => setReviewDescription(e.target.value)}
+                        >
 
                         </textarea>
                     </div>

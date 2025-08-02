@@ -1,17 +1,37 @@
 import { NavLink } from "react-router-dom";
-import { useOktaAuth } from "@okta/okta-react";
 import Spinner from "../utils/Spinner";
+import { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 export default function Navbar() {
-  const { oktaAuth, authState } = useOktaAuth();
+  const [roles, setRoles] = useState<string[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { isAuthenticated, loginWithRedirect, logout, getIdTokenClaims } = useAuth0();
 
-  if (!authState) {
-    return <Spinner />;
+  useEffect(() => {
+    const fetchRoles = async () => {
+      const claims = await getIdTokenClaims();
+      const fetchedRoles = claims?.['https://luv2code-react-library.com/roles'] || [];
+      setRoles(fetchedRoles);
+      setLoading(false);
+    }
+
+    fetchRoles();
+  }, [isAuthenticated, getIdTokenClaims]);
+
+  if (loading) {
+    return <Spinner />
   }
 
-  const handleLogout = async () => oktaAuth.signOut();
-  //console.log(authState);
+  function handleLogout() {
+    logout({ logoutParams: { returnTo: window.location.origin } })
+  }
+
+  function handleLogin() {
+    loginWithRedirect();
+    window.location.assign('/');
+  }
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark main-color py-3">
@@ -31,7 +51,7 @@ export default function Navbar() {
         <div className="collapse navbar-collapse" id="navbarNavDropdown">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <NavLink className="nav-link" to="/">
+              <NavLink className="nav-link" to="/home">
                 Home
               </NavLink>
             </li>
@@ -40,22 +60,14 @@ export default function Navbar() {
                 Search Books
               </NavLink>
             </li>
-            {authState.isAuthenticated &&
+            {isAuthenticated && roles?.includes('admin') &&
               <li className="nav-item">
                 <NavLink className="nav-link" to="/shelf">
                   Shelf
                 </NavLink>
               </li>
             }
-            {authState.isAuthenticated &&
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/fees">
-                  Pay fees
-                </NavLink>
-              </li>
-            }
-            {authState.isAuthenticated && 
-              authState.accessToken?.claims?.userType === 'admin' &&
+            {isAuthenticated && roles?.includes('admin') &&
               <li className="nav-item">
                 <NavLink className="nav-link" to="/admin">
                   Admin
@@ -64,11 +76,11 @@ export default function Navbar() {
             }
           </ul>
           <ul className="navbar-nav ms-auto">
-            {!authState.isAuthenticated ? (
+            {isAuthenticated ? (
               <li className="nav-item m-1">
-                <NavLink type="button" className="btn btn-outline-light" to='/login'>
+                <button type="button" className="btn btn-outline-light"onClick={handleLogin}>
                   Sign in
-                </NavLink>
+                </button>
               </li>
             ) : (
               <li>

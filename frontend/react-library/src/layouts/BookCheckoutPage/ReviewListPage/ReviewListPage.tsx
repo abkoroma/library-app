@@ -19,7 +19,7 @@ export default function ReviewListPage() {
 
     useEffect(() => {
         const fetchBookReviews = async () => {
-            const reviewsUrl: string = `${process.env.REACT_APP_API}/reviews/search/findByBookId?bookId=${bookId}&page=${currentPage - 1}&size=${reviewsPerPage}`;
+            const reviewsUrl = `${process.env.REACT_APP_API}/reviews/search/findByBookId?bookId=${bookId}&page=${currentPage - 1}&size=${reviewsPerPage}`;
             const responseReviews = await fetch(reviewsUrl);
     
             if (!responseReviews.ok) {
@@ -91,7 +91,11 @@ export default function ReviewListPage() {
             </div>
 
             {totalPages > 1 && 
-                <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
+                <Pagination 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    paginate={paginate} 
+                />
             }
         </div>       
     );

@@ -1,4 +1,4 @@
-package com.library.springbootlibrary.dao;
+/*package com.library.springbootlibrary.dao;
 
 
 import com.library.springbootlibrary.entity.Payment;
@@ -8,3 +8,4 @@ public interface PaymentRepositoryDAO extends JpaRepository<Payment, Long> {
 
     Payment findByUserEmail(String userEmail);
 }
+*/

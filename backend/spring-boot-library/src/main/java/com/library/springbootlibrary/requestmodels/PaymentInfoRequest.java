@@ -1,4 +1,4 @@
-package com.library.springbootlibrary.requestmodels;
+/*package com.library.springbootlibrary.requestmodels;
 
 import lombok.Data;
 
@@ -9,3 +9,4 @@ public class PaymentInfoRequest {
     private String currency;
     private String receiptEmail;
 }
+*/

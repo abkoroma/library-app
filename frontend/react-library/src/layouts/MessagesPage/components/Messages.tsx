@@ -1,12 +1,12 @@
-import { useOktaAuth } from "@okta/okta-react";
 import { Fragment, useEffect, useState } from "react";
 import MessageModel from "../../../models/MessageModel";
 import Spinner from "../../utils/Spinner";
 import Pagination from "../../utils/Pagination";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Messages() {
 
-    const { authState } = useOktaAuth();
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const [isLoadingMessages, setIsLoadingMessages] = useState(true);
     const [httpError, setHttpError] = useState(null);
 
@@ -18,12 +18,13 @@ export default function Messages() {
 
     useEffect(() => {
         const fetchUserMessages = async () => {
-            if (authState && authState?.isAuthenticated) {
-                const url = `${process.env.REACT_APP_API}/messages/search/findByUserEmail/?userEmail=${authState?.accessToken?.claims.sub}&page=${currentPage - 1}&size=${messagesPerPage}`;
+            if (isAuthenticated) {
+                const accessToken = await getAccessTokenSilently();
+                const url = `${process.env.REACT_APP_API}/messages/search/findByUserEmail/?userEmail=${user?.email}&page=${currentPage - 1}&size=${messagesPerPage}`;
                 const requestOptions = {
                     method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                        Authorization: `Bearer ${accessToken}`,
                         'Content-Type': 'application/json',
                     }
                 };
@@ -42,7 +43,7 @@ export default function Messages() {
             setHttpError(error.message);
         });
         window.scrollTo(0, 0);
-    }, [authState, currentPage, messagesPerPage]);
+    }, [currentPage, getAccessTokenSilently, isAuthenticated, messagesPerPage, user]);
 
     if (isLoadingMessages) {
         return (

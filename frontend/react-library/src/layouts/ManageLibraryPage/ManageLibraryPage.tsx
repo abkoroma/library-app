@@ -1,16 +1,31 @@
-import { useOktaAuth } from "@okta/okta-react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import AdminMessages from "./components/AdminMessages";
 import AddNewBook from "./components/AddNewBook";
 import ChangeQuantityOfBooks from "./components/ChangeQuantityOfBooks";
+import { useAuth0 } from "@auth0/auth0-react";
+import Spinner from "../utils/Spinner";
 
 export default function ManageLibraryPage() {
 
-    const { authState } = useOktaAuth();
+    const { getIdTokenClaims } = useAuth0();
+
+    const [roles, setRoles] = useState<string[] | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const [changeQuantityOfBooksClick, setChangeQuantityOfBooksClick] = useState(false);
     const [messagesClick, setMessagesClick] = useState(false);
+
+    useEffect(() => {
+        const fetchBooks = async () => {
+            const claims = await getIdTokenClaims();
+            const fetchedRoles = claims?.['https://luv2code-react-library.com/roles'] || [];
+            setRoles(fetchedRoles);
+            setLoading(false);
+        }
+
+        fetchBooks();
+    }, [getIdTokenClaims]);
 
     function addBookClickFunction() {
         setChangeQuantityOfBooksClick(false);
@@ -27,8 +42,12 @@ export default function ManageLibraryPage() {
         setMessagesClick(true) ;  
     }
 
-    if (authState?.accessToken?.claims.userType === undefined) {
-        return <Navigate to="/" />
+    if (loading) {
+        return <Spinner />
+    }
+
+    if (!roles?.includes('admin')) {
+        return <Navigate to="/home" />
     }
 
 

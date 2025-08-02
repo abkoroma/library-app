@@ -1,8 +1,8 @@
-import { useOktaAuth } from "@okta/okta-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router-dom";
 
 export default function Heroes() {
-  const { authState } = useOktaAuth();
+  const { isAuthenticated } = useAuth0();
 
   return (
     <div>
@@ -19,7 +19,7 @@ export default function Heroes() {
                 Whether it is to learn a new skill or grow within one, we will
                 be able to provide the top content for you!
               </p>
-              {authState?.isAuthenticated ? (
+              {isAuthenticated ? (
                 <Link
                   type="button"
                   className="btn btn-primary main-color btn-lg text-white"
@@ -69,7 +69,7 @@ export default function Heroes() {
                 Whether it is to learn a new skill or grow within one, we will
                 be able to provide the top content for you!
               </p>
-              {authState?.isAuthenticated ? (
+              {isAuthenticated ? (
                 <Link
                   type="button"
                   className="btn btn-primary main-color btn-lg text-white"
